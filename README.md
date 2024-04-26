@@ -15,4 +15,6 @@ By Is test By  Pyhton 3.11.8 Only
 
 2 - Resize Teminal , Cmd To Full Screen For Good UI
 
+3 - Fine Game Is Start Enjoy
+
 
