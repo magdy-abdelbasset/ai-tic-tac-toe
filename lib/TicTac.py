@@ -1,13 +1,16 @@
 from enum import Enum
 from lib.PrintChar import PrintChar
+# الحالة الخاصة بحقل اللعية
 class SquareStatus(Enum):
     EMPTY  = 0
     XCHAR  = 1
     OCHAR  = 2
+# الاعبين
 class Player(Enum):
     PlayerX  = 1
     PlayerO  = 2
 class ToySquare:
+    # ضبط مربع اللعبة على فارغ
     status = SquareStatus.EMPTY
     def __init__(self ,status: SquareStatus = SquareStatus.EMPTY ):
         self.status
@@ -25,30 +28,41 @@ class ToySquare:
 class TicTac :
     squares :list[ToySquare] = []
     avalible_squares :list[ToySquare] = []
-    
+    print_char = PrintChar()
     player_turn = Player.PlayerX
     winner :Player= None
     def __init__(self):
         self.new_game()
         pass
     def new_game(self):
+        self.squares = []
+        self.player_turn = Player.PlayerX
+        self.winner = None
         for i in range(1,10) :
             self.squares.append(ToySquare())
         self.printGame()
         self.updateAvalabileSquares()        
         self.newTurn()
+    def get_player_name(self ,player:Player):
+        p = "O"
+        p2 = "2"
+        if(player == Player.PlayerX):
+            p=  "X" 
+            p2 = "1"
+        return {"name":p,"number":p2}
     def newTurn(self):
         
         # self.printGame()
-        validatin_msg = "Input Must Be Int And Between 1 And 9"
+        
+        validatin_msg = "Input Must Be Int And Between 1 And 9 "
         try:
-            p = "O"
-            p2 = "Number 2"
-            if(self.player_turn == Player.PlayerX):
-                p=  "X" 
-                p2 = "Number 1"
-            print("Now Player Turn In The Toy Is Player "+str(p)+" ( "+str(p2)+" )")
-            SquareNumber = int(input("Enter Square Number \n"))
+            player = self.get_player_name(self.player_turn)
+            print("If You Wan Close Game write: exit and press Enter ")
+            print("Now Player Turn In The Toy Is Player "+str(player["name"])+" ( Number "+str(player["number"])+" )")
+            input_1 = input("Enter Square Number \n")
+            if(  input_1 == "exit" ):
+                return
+            SquareNumber = int(input_1)
         except:
             print(validatin_msg)
             self.newTurn()
@@ -100,23 +114,27 @@ class TicTac :
                 
 
     def checkGame(self):
-        if(len(self.avalible_squares) == 0):
+        if(len(self.avalible_squares) == 0 and not self.thereIsWiner()):
             print("Game Is End And No Player Win")
             new_g = input("if you want play again press Y")
             if(new_g == "y" or new_g == "Y"):
-                return True
+                return self.new_game()
+            else:
+                return False
+                
         elif(not self.thereIsWiner()):
             return True
         else :
+            player = self.get_player_name(self.winner)
+            print("Game Is End Player {player} Winer".format(player=player["name"]))
+            self.print_char.print_congrate()
             if(self.winner == Player.PlayerX):
-                player= "X"
+                self.print_char.print_win("x")
             else:
-                player ="O"
-            print("Game Is End Player {player} Winer".format(player=self.winner))
-            self.print_congrate()
+                self.print_char.print_win("o")
             new_g = input("if you want play again press Y")
             if(new_g == "y" or new_g == "Y"):
-                return True
+                return self.new_game()
             return False
              
     def thereIsWiner(self):
@@ -134,14 +152,13 @@ class TicTac :
 
     def print_row(self,square_1:SquareStatus , square_2 :SquareStatus , square_3 :SquareStatus,numRow:int,\
                   MainRow:int,start:bool = True, end :bool = True):
-        print_chars = PrintChar()
         row_str = ""
         str_start_end = "||"
         str_margin = " "
         border_top_bottom = "="
         if((numRow == 1 and start) or (numRow == 13 and end)):
             for i in range(1,4):
-                row_str += print_chars.print_full_char(border_top_bottom,7)
+                row_str += self.print_char.print_full_char(border_top_bottom,7)
                 num = 0
                 if(numRow == 1 and MainRow == 1):
                     num = i
@@ -150,11 +167,11 @@ class TicTac :
                 elif (numRow == 1 and MainRow == 3):
                     num = i +6
                 elif(numRow == 13 and MainRow == 3):
-                    print(print_chars.print_full_char(border_top_bottom,18*3))
+                    print(self.print_char.print_full_char(border_top_bottom,18*3))
                     return
                 row_str += "({num})".format(num=num)
                 # row_str += str_start_end
-                row_str += print_chars.print_full_char(border_top_bottom,8)
+                row_str += self.print_char.print_full_char(border_top_bottom,8)
 
             print(row_str)
             return
@@ -164,7 +181,7 @@ class TicTac :
             for i in range(1,4):
                 if(i != 2 and i != 3):
                     row_str += str_start_end
-                row_str += print_chars.print_full_char(str_margin,15)
+                row_str += self.print_char.print_full_char(str_margin,15)
                 # if(i != 3):
                 row_str += str_start_end
 
@@ -179,29 +196,12 @@ class TicTac :
                 row_str += str_start_end
             match square:
                 case SquareStatus.EMPTY :
-                    row_str += print_chars.print_full_char(" ",15)
-                    # row_str += print_chars.print_x(num_with_out_margin)
+                    row_str += self.print_char.print_full_char(" ",15)
                 case SquareStatus.XCHAR :
-                    row_str += print_chars.print_x(num_with_out_margin)
+                    row_str += self.print_char.print_x(num_with_out_margin)
                 case SquareStatus.OCHAR :
-                    row_str += print_chars.print_o(num_with_out_margin)
+                    row_str += self.print_char.print_o(num_with_out_margin)
             if(k != 2):
                 row_str += str_start_end
         row_str += str_start_end
         print(row_str)
-    def print_congrate(self):
-        print("*********************************************************************")
-        print("*********************************************************************")
-        print("*             ccccc             ooo                nnnnn          nnn        G        R     A    T S                      *")
-        print("*          ccc              ooo     ooo            nnnnnn         nnn                                   *")
-        print("*         ccc             ooo         ooo          nnn nnn        nnn                                 *")
-        print("*        ccc             ooo           ooo         nnn  nnn       nnn                                              *")
-        print("*       ccc             ooo             ooo        nnn   nnn      nnn                                      *")
-        print("*      ccc             ooo               ooo       nnn    nnn     nnn                               *")
-        print("**    ccc             ooo                  ooo     nnn     nnn    nnn                                            **")
-        print("**     ccc             ooo               ooo       nnn      nnn   nnn                            ***")
-        print("**       ccc            ooo             ooo        nnn       nnn  nnn                             **")
-        print("**         ccc            ooo          ooo         nnn        nnn nnn                           **")
-        print("**           ccc            ooo       ooo          nnn        nnnnnnn                            **")
-        print("**              cccc            oooo               nnn        nnnnnnn                            ***")
-        
